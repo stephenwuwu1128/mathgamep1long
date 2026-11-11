@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♂️ 小小特務：長闊高解碼特訓</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti for animations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Fredoka & Zen Maru Gothic for super cute rounded styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        agentBg: '#FFF9E6',
+                        cardFront: '#FFF3D1',
+                        cardBack: '#FF7B9C',
+                        agentBlue: '#4D96FF',
+                        agentGreen: '#6BCB77',
+                        agentYellow: '#FFD93D',
+                        agentRed: '#FF6B6B',
+                        agentPurple: '#9D4EDD'
+                    },
+                    fontFamily: {
+                        cute: ['"Zen Maru Gothic"', '"Fredoka"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', 'Fredoka', sans-serif;
+            background-color: #FFF9E6;
+            background-image: radial-gradient(#FFD93D 1.5px, transparent 1.5px), radial-gradient(#FFD93D 1.5px, #FFF9E6 1.5px);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
+
+        /* 3D Flip Card Effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Bounce Animations */
+        @keyframes gentle-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-gentle {
+            animation: gentle-bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(77, 150, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(77, 150, 255, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(77, 150, 255, 0); }
+        }
+        .pulse-button {
+            animation: pulse-ring 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-800 antialiased selection:bg-yellow-200">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full bg-white/80 backdrop-blur-md border-b-4 border-yellow-300 px-4 py-3 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+                <span class="text-3xl">🕵️‍♂️</span>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black text-amber-600 tracking-wide">小小特務：解碼特訓</h1>
+                    <p class="text-xs text-amber-500 font-bold hidden sm:block">小一數學長度、闊度、厚度實作評量</p>
+                </div>
+            </div>
+            <div id="navButtons" class="flex gap-2 hidden">
+                <button onclick="shuffleDeck()" class="bg-amber-400 hover:bg-amber-500 text-amber-900 font-bold px-3 py-2 rounded-2xl shadow-md border-b-4 border-amber-600 active:translate-y-1 active:border-b-0 transition flex items-center gap-1 text-sm sm:text-base">
+                    <span>🔄</span> 洗牌
+                </button>
+                <button onclick="goHome()" class="bg-sky-400 hover:bg-sky-500 text-white font-bold px-3 py-2 rounded-2xl shadow-md border-b-4 border-sky-600 active:translate-y-1 active:border-b-0 transition flex items-center gap-1 text-sm sm:text-base">
+                    <span>🏠</span> 菜單
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full">
+
+            <!-- ================= HOME MENU PAGE ================= -->
+            <div id="homePage" class="text-center space-y-8 py-6">
+                <!-- Cute Mascot & Welcome Title -->
+                <div class="relative inline-block">
+                    <div class="text-7xl sm:text-8xl animate-gentle mb-2">🕵️‍♀️</div>
+                    <div class="bg-yellow-300 text-amber-900 font-black px-4 py-1 rounded-full text-sm inline-block shadow-sm border-2 border-amber-400">
+                        小一數學實作評量遊戲
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-3xl sm:text-5xl font-black text-gray-800 mb-3 tracking-wide">
+                        選擇特務任務等級！
+                    </h2>
+                    <p class="text-gray-600 font-bold text-base sm:text-lg max-w-md mx-auto">
+                        伸出你的小手指，依照卡片指令找出對應的物品，並用正確的手勢向老師證明吧！
+                    </p>
+                </div>
+
+                <!-- Level Selection Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto pt-4">
+                    <!-- Level 1 Button -->
+                    <button onclick="startLevel(1)" class="group bg-white hover:bg-sky-50 p-6 rounded-3xl border-4 border-sky-300 hover:border-sky-400 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden pulse-button">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-sky-100 rounded-full group-hover:scale-150 transition-transform duration-500 z-0"></div>
+                        <span class="text-5xl mb-3 z-10 group-hover:scale-110 transition-transform">🔍</span>
+                        <div class="z-10">
+                            <span class="bg-sky-500 text-white text-xs font-black px-3 py-1 rounded-full">第一級</span>
+                            <h3 class="text-2xl font-black text-sky-600 mt-2 mb-1">基礎解碼卡</h3>
+                            <p class="text-xs text-gray-500 font-bold">每次抽 1 張卡片<br>（訓練單一維度：厚/薄/長/短/闊/窄）</p>
+                        </div>
+                    </button>
+
+                    <!-- Level 2 Button -->
+                    <button onclick="startLevel(2)" class="group bg-white hover:bg-pink-50 p-6 rounded-3xl border-4 border-pink-300 hover:border-pink-400 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-pink-100 rounded-full group-hover:scale-150 transition-transform duration-500 z-0"></div>
+                        <span class="text-5xl mb-3 z-10 group-hover:scale-110 transition-transform">⚡</span>
+                        <div class="z-10">
+                            <span class="bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full">第二級</span>
+                            <h3 class="text-2xl font-black text-pink-600 mt-2 mb-1">雙重特徵卡</h3>
+                            <p class="text-xs text-gray-500 font-bold">每次抽 2 張卡片組合<br>（挑戰綜合維度：例如 厚 ＋ 窄）</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= GAMEPLAY AREA ================= -->
+            <div id="gamePage" class="hidden space-y-6">
+                <!-- Level Indicator & Status -->
+                <div class="flex justify-between items-center bg-white/70 px-4 py-2 rounded-2xl border-2 border-yellow-200">
+                    <span id="levelBadge" class="font-black text-sm px-3 py-1 rounded-full bg-sky-500 text-white">
+                        Level 1
+                    </span>
+                    <span id="cardCountText" class="text-sm font-bold text-amber-800">
+                        剩餘卡片：6 / 6
+                    </span>
+                </div>
+
+                <!-- CARDS CONTAINER -->
+                <div id="cardsArea" class="flex flex-wrap justify-center items-center gap-6 py-4 min-h-[380px]">
+                    <!-- Dynamic cards will be injected here -->
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-2">
+                    <button id="drawBtn" onclick="drawCards()" class="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xl px-10 py-4 rounded-3xl shadow-lg hover:shadow-xl border-b-4 border-orange-600 active:translate-y-1 active:border-b-0 transition flex items-center justify-center gap-2">
+                        <span>🃏</span> 點擊抽卡！
+                    </button>
+
+                    <button id="verifyBtn" onclick="triggerSuccess()" class="hidden w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl px-8 py-4 rounded-3xl shadow-lg border-b-4 border-emerald-700 active:translate-y-1 active:border-b-0 transition flex items-center justify-center gap-2">
+                        <span>🎉</span> 完成證明！下一題
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs font-bold text-amber-700/60">
+        小一數學實作評量教具 ‧ 快樂學習長闊高
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Audio Synthesizer for Fun Sound Effects (No external audio file dependencies)
+        const playSound = (type) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'flip') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                } else if (type === 'success') {
+                    const now = ctx.currentTime;
+                    const notes = [440, 554.37, 659.25, 880]; // A major arpeggio
+                    notes.forEach((freq, index) => {
+                        const noteOsc = ctx.createOscillator();
+                        const noteGain = ctx.createGain();
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.value = freq;
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(ctx.destination);
+                        noteGain.gain.setValueAtTime(0.2, now + index * 0.08);
+                        noteGain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.25);
+                        noteOsc.start(now + index * 0.08);
+                        noteOsc.stop(now + index * 0.08 + 0.25);
+                    });
+                } else if (type === 'shuffle') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                }
+            } catch(e) {
+                console.log('Audio error:', e);
+            }
+        };
+
+        // Master Deck Definition
+        const baseCards = [
+            {
+                id: '01',
+                title: '【特務任務 01】',
+                target: '厚',
+                badgeBg: 'bg-red-500',
+                textColor: 'text-red-500',
+                borderColor: 'border-red-400',
+                icon: '🤏',
+                gesture: '用一隻手的「食指與拇指」側邊捏住！捏得很大！',
+                examples: ['厚字典', '精裝故事書', '厚木積木', '厚盒餅乾']
+            },
+            {
+                id: '02',
+                title: '【特務任務 02】',
+                target: '薄',
+                badgeBg: 'bg-emerald-500',
+                textColor: 'text-emerald-500',
+                borderColor: 'border-emerald-400',
+                icon: '📄',
+                gesture: '用「食指與拇指」輕輕捏住！手指貼得極近！',
+                examples: ['單張圖畫紙', '塑膠墊板', '發票小卡', '薄書籤']
+            },
+            {
+                id: '03',
+                title: '【特務任務 03】',
+                target: '闊',
+                badgeBg: 'bg-blue-500',
+                textColor: 'text-blue-500',
+                borderColor: 'border-blue-400',
+                icon: '↔️',
+                gesture: '用雙手橫向左右抱住！雙手張得開開的！',
+                examples: ['大畫冊', '寬禮盒', '大方格便條紙', '電視遙控器寬面']
+            },
+            {
+                id: '04',
+                title: '【特務任務 04】',
+                target: '窄',
+                badgeBg: 'bg-purple-500',
+                textColor: 'text-purple-500',
+                borderColor: 'border-purple-400',
+                icon: '🤏',
+                gesture: '用雙手橫向左右合緊！手掌靠得非常近！',
+                examples: ['香蕉盒', '窄鋼筆盒', '長條木塊', '專用字典書脊']
+            },
+            {
+                id: '05',
+                title: '【特務任務 05】',
+                target: '長',
+                badgeBg: 'bg-amber-500',
+                textColor: 'text-amber-500',
+                borderColor: 'border-amber-400',
+                icon: '📏',
+                gesture: '用雙手食指順著最長的邊一直拉開！',
+                examples: ['長直尺', '未用過的新鉛筆', '長吸管', '長筷子']
+            },
+            {
+                id: '06',
+                title: '【特務任務 06】',
+                target: '短',
+                badgeBg: 'bg-pink-500',
+                textColor: 'text-pink-500',
+                borderColor: 'border-pink-400',
+                icon: '✂️',
+                gesture: '用雙手食指比出很短的距離！',
+                examples: ['用過的短橡皮擦', '短小夾子', '正方形木塊', '短便條紙']
+            }
+        ];
+
+        // State Variables
+        let currentLevel = 1;
+        let deck = [];
+        let isDrawn = false;
+
+        // Initialize / Shuffle Deck
+        function initDeck() {
+            deck = [...baseCards];
+            shuffleArray(deck);
+            updateCardCount();
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        // Navigation Controls
+        function startLevel(lvl) {
+            currentLevel = lvl;
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('gamePage').classList.remove('hidden');
+            document.getElementById('navButtons').classList.remove('hidden');
+            
+            const badge = document.getElementById('levelBadge');
+            if (lvl === 1) {
+                badge.textContent = '第一級：基礎單卡解碼';
+                badge.className = 'font-black text-sm px-4 py-1.5 rounded-full bg-sky-500 text-white shadow-sm';
+            } else {
+                badge.textContent = '第二級：雙重特徵組合挑戰';
+                badge.className = 'font-black text-sm px-4 py-1.5 rounded-full bg-pink-500 text-white shadow-sm';
+            }
+
+            initDeck();
+            resetCardsArea();
+        }
+
+        function goHome() {
+            document.getElementById('homePage').classList.remove('hidden');
+            document.getElementById('gamePage').classList.add('hidden');
+            document.getElementById('navButtons').classList.add('hidden');
+            resetCardsArea();
+        }
+
+        function shuffleDeck() {
+            playSound('shuffle');
+            initDeck();
+            resetCardsArea();
+        }
+
+        function updateCardCount() {
+            document.getElementById('cardCountText').textContent = `牌堆剩餘：${deck.length} / ${baseCards.length}`;
+        }
+
+        function resetCardsArea() {
+            isDrawn = false;
+            const area = document.getElementById('cardsArea');
+            area.innerHTML = '';
+            
+            // Show placeholder card backs
+            const count = currentLevel === 1 ? 1 : 2;
+            for (let i = 0; i < count; i++) {
+                area.appendChild(createCardBackHTML());
+            }
+
+            document.getElementById('drawBtn').classList.remove('hidden');
+            document.getElementById('verifyBtn').classList.add('hidden');
+        }
+
+        // HTML Generator for Card Back
+        function createCardBackHTML() {
+            const div = document.createElement('div');
+            div.className = 'w-72 h-[360px] bg-white rounded-3xl border-4 border-amber-300 shadow-xl flex flex-col items-center justify-center p-6 text-center animate-gentle relative overflow-hidden';
+            div.innerHTML = `
+                <div class="absolute inset-2 border-2 border-dashed border-amber-200 rounded-2xl pointer-events-none"></div>
+                <span class="text-6xl mb-4">🕵️‍♂️</span>
+                <h3 class="text-2xl font-black text-amber-500 mb-2">特務秘密任務</h3>
+                <p class="text-xs font-bold text-gray-400">點擊下方按鈕抽牌解碼！</p>
+            `;
+            return div;
+        }
+
+        // Draw Card Logic
+        function drawCards() {
+            if (deck.length < currentLevel) {
+                // Auto re-shuffle if not enough cards
+                initDeck();
+            }
+
+            playSound('flip');
+            const area = document.getElementById('cardsArea');
+            area.innerHTML = '';
+
+            const numToDraw = currentLevel === 1 ? 1 : 2;
+            const drawnCards = [];
+
+            for (let i = 0; i < numToDraw; i++) {
+                drawnCards.push(deck.pop());
+            }
+
+            updateCardCount();
+
+            // Build Animated Card Elements
+            drawnCards.forEach((card, idx) => {
+                const cardEl = createInteractiveCardHTML(card, idx);
+                area.appendChild(cardEl);
+
+                // Auto flip after slight delay
+                setTimeout(() => {
+                    const inner = cardEl.querySelector('.card-inner');
+                    inner.classList.add('rotate-y-180');
+                    playSound('flip');
+                }, 300 + idx * 250);
+            });
+
+            isDrawn = true;
+            document.getElementById('drawBtn').classList.add('hidden');
+            document.getElementById('verifyBtn').classList.remove('hidden');
+        }
+
+        // HTML Generator for Card Front & Back Flip Component
+        function createInteractiveCardHTML(card, index) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'w-72 h-[380px] perspective-1000';
+
+            const exampleList = card.examples.map(ex => `<li class="bg-amber-50/80 text-amber-900 rounded-lg px-2 py-0.5 text-xs font-bold">💡 ${ex}</li>`).join('');
+
+            wrapper.innerHTML = `
+                <div class="card-inner w-full h-full relative transform-style-3d transition-transform duration-700">
+                    <!-- BACK OF CARD -->
+                    <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-amber-300 to-orange-400 rounded-3xl border-4 border-white shadow-xl flex flex-col items-center justify-center p-6 text-white backface-hidden">
+                        <span class="text-6xl mb-2">❓</span>
+                        <h4 class="text-2xl font-black">解碼中...</h4>
+                    </div>
+
+                    <!-- FRONT OF CARD -->
+                    <div class="absolute inset-0 w-full h-full bg-white rounded-3xl border-4 ${card.borderColor} shadow-xl flex flex-col justify-between p-5 text-gray-800 backface-hidden rotate-y-180 relative overflow-hidden">
+                        
+                        <!-- Top Header -->
+                        <div class="flex justify-between items-center border-b-2 border-gray-100 pb-2">
+                            <span class="text-xs font-black text-gray-400">${card.title}</span>
+                            <span class="${card.badgeBg} text-white font-black text-xs px-2.5 py-0.5 rounded-full shadow-sm">
+                                任務 #${card.id}
+                            </span>
+                        </div>
+
+                        <!-- Target Visual -->
+                        <div class="text-center my-1">
+                            <div class="text-4xl mb-1">${card.icon}</div>
+                            <div class="text-xs text-gray-500 font-bold">尋找一個物件：</div>
+                            <div class="text-4xl font-black ${card.textColor} tracking-wider my-1">
+                                「${card.target}」
+                            </div>
+                        </div>
+
+                        <!-- Action/Gesture Requirement -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-2.5">
+                            <div class="text-[11px] font-black text-gray-600 mb-0.5 flex items-center gap-1">
+                                🖐️ 證明動作口訣：
+                            </div>
+                            <div class="text-xs font-bold text-gray-700 leading-tight">
+                                ${card.gesture}
+                            </div>
+                        </div>
+
+                        <!-- Examples List -->
+                        <div>
+                            <div class="text-[10px] font-bold text-gray-400 mb-1">尋寶實物建議：</div>
+                            <ul class="grid grid-cols-2 gap-1">
+                                ${exampleList}
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+            return wrapper;
+        }
+
+        // Success / Verification trigger with Confetti & Sounds
+        function triggerSuccess() {
+            playSound('success');
+            
+            // Confetti Explosion
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // Prepare next draw
+            if (deck.length < currentLevel) {
+                initDeck();
+            }
+
+            resetCardsArea();
+        }
+
+        // Initialize on Load
+        window.onload = function() {
+            initDeck();
+        };
+    </script>
+</body>
+</html>
